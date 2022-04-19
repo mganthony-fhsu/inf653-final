@@ -1,0 +1,19 @@
+{
+  "name": "inf653-final",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mganthony-fhsu/inf653-final.git"
+  },
+  "author": "Michael G Anthony",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mganthony-fhsu/inf653-final/issues"
+  },
+  "homepage": "https://github.com/mganthony-fhsu/inf653-final#readme"
+}
