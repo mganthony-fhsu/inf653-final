@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server",
+    "dev": "nodemon: server"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,13 @@
   "bugs": {
     "url": "https://github.com/mganthony-fhsu/inf653-final/issues"
   },
-  "homepage": "https://github.com/mganthony-fhsu/inf653-final#readme"
+  "homepage": "https://github.com/mganthony-fhsu/inf653-final#readme",
+  "dependencies": {
+    "date-fns": "^2.28.0",
+    "express": "^4.17.3",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
 }
