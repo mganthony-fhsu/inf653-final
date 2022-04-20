@@ -19,7 +19,9 @@
   "homepage": "https://github.com/mganthony-fhsu/inf653-final#readme",
   "dependencies": {
     "date-fns": "^2.28.0",
+    "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "mongoose": "^6.3.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
