@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/subdir", express.static(path.join(__dirname, "/public")));
 
 app.use("/", require("./routes/root"));
-app.use("/employees", require("./routes/api/employees"));
+app.use("/states", require("./routes/api/states"));
 
 // default
 app.all("*", (req, res) => {
