@@ -1,6 +1,6 @@
-const Employee = require("../model/Employee");
+const Employee = require("../model/FunFacts");
 const states = require("../data/states.json");
-const { find, startSession } = require("../model/Employee");
+const { find, startSession } = require("../model/FunFacts");
 
 const getAllStates = async (req, res) => {
   if (req?.query?.contig === undefined) {
