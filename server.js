@@ -11,6 +11,11 @@ const connectDB = require("./config/dbCon");
 
 const PORT = process.env.PORT || 3500;
 
+// DEPLOY to Glitch
+// https://glitch.com/edit/#!/import/github/mganthony-fhsu/inf653-final
+
+
+
 // Connect to MongoDB
 connectDB();
 
