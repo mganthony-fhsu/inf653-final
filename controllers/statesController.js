@@ -41,17 +41,14 @@ const createNewFunFacts = async (req, res) => {
 
   const facts = await FunFacts.findOne({ stateCode: req.code }).exec();
   let result;
-  console.log(facts.funfacts);
   if (!facts) {
-    result = FunFacts.create({
+    result = await FunFacts.create({
       stateCode: req.code,
       funfacts: req.body.funfacts,
     });
+    console.log(result);
   } else {
   facts.funfacts = [...facts.funfacts, ...req.body.funfacts];
-
-  console.log(facts);
-  
   result = await facts.save();
   }
   res.json(result);
