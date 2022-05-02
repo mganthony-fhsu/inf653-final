@@ -4,7 +4,7 @@ const states = require("../data/states.json");
 const getAllStates = async (req, res) => {
   let result;
   if (req?.query?.contig === undefined) {
-    result = [...states]; // use the spread operator to create a non-const copy.
+    result = await [...states]; // use the spread operator to create a non-const copy.
   } else {
     result = await findStatesByContiguity(req.query.contig);
   }
@@ -37,6 +37,11 @@ const createNewFunFacts = async (req, res) => {
     return res
       .status(400)
       .json({ message: "State fun facts value required"});
+  }
+  if (!Array.isArray(req.body.funfacts)) {
+    return res
+      .status(400)
+      .json({ message: "State fun facts value must be an array"});
   }
 
   const facts = await FunFacts.findOne({ stateCode: req.code }).exec();
@@ -73,7 +78,16 @@ const updateFunFacts = async (req, res) => {
       .status(404)
       .json({ message: `No Fun Facts found for ${req.name}` });
   }
-
+  if (index >= facts.funfacts.length) {
+    return res
+    .status(404)
+    .json({ message: `No Fun Fact found at that index for ${req.name}` });
+  }
+  if (!facts.funfacts[index]) {
+    return res
+    .status(404)
+    .json({ message: `No Fun Fact found at that index for ${req.name}` });
+  }
   facts.funfacts[index] = req.body.funfact;
   console.log(facts); 
   const result = await facts.save();
@@ -90,17 +104,20 @@ const deleteFunFacts = async (req, res) => {
   const index = req.body.index-1;
   const facts = await FunFacts.findOne({ stateCode: req.code }).exec();
 
-  console.log(facts.funfacts);
+  //console.log(facts.funfacts);
   if (!facts) {
     return res
       .status(404)
       .json({ message: `No Fun Facts found for ${req.name}` });
   }
-
-  fact = facts.funfacts[index];
+  if (index >= facts.funfacts.length) {
+    return res
+    .status(404)
+    .json({ message: `No Fun Fact found at that index for ${req.name}` });
+  }
   facts.funfacts.splice(index, 1);
 
-  console.log(facts);
+  //console.log(facts);
   
   const result = await facts.save();
   res.json(result);
@@ -136,7 +153,7 @@ const getStatePopulation = async (req, res) => {
   let state = await findState(req.code);
   res.json({
     state: state.state,
-    population: state.population,
+    population: state.population.toLocaleString("en-US"),
   });
 };
 
