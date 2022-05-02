@@ -1,15 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const statesController = require("../../controllers/statesController");
+const verifyStates = require("../../middleware/verifyStates");
 
 router.route("/").get(statesController.getAllStates);
 
 router
+  .use("/:state", verifyStates)
   .route("/:state/funfact")
-  .get(statesController.getAllStates)
-  .post(statesController.createNewEmployee)
-  .patch(statesController.updateEmployee)
-  .delete(statesController.deleteEmployee);
+  .get(statesController.getFunFacts)
+  .post(statesController.createNewFunFacts)
+  .patch(statesController.updateFunFacts)
+  .delete(statesController.deleteFunFacts);
 
 router.route("/:state").get(statesController.getState);
 

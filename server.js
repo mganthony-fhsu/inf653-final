@@ -17,6 +17,8 @@ connectDB();
 // custom middleware logger
 app.use(logger);
 
+
+
 // third party middleware
 // Cross Origin Resource Sharing
 app.use(cors());
@@ -30,6 +32,8 @@ app.use("/subdir", express.static(path.join(__dirname, "/public")));
 
 app.use("/", require("./routes/root"));
 app.use("/states", require("./routes/api/states"));
+
+
 
 // default
 app.all("*", (req, res) => {

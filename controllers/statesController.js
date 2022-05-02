@@ -1,102 +1,126 @@
-const Employee = require("../model/FunFacts");
+const FunFacts = require("../model/FunFacts");
 const states = require("../data/states.json");
-const { find, startSession } = require("../model/FunFacts");
 
 const getAllStates = async (req, res) => {
+  let result;
   if (req?.query?.contig === undefined) {
-    res.json(states);
+    result = [...states]; // use the spread operator to create a non-const copy.
   } else {
-    console.log(req?.query?.contig);
-    const result = await findStatesByContiguity(req.query.contig);
-    res.json(result);
+    result = await findStatesByContiguity(req.query.contig);
   }
-};
-
-const createNewEmployee = async (req, res) => {
-  if (!req?.body?.firstname || !req?.body?.lastname) {
-    return res
-      .status(400)
-      .json({ message: "First and Last names are required." });
-  }
-
-  try {
-    const result = Employee.create({
-      firstname: req.body.firstname,
-      lastname: req.body.lastname,
-    });
-    res.status(201).json(result);
-  } catch (err) {
-    console.err(err);
-  }
-};
-
-const updateEmployee = async (req, res) => {
-  if (!req?.body?.id) {
-    return res.status(400).json({ message: "ID Parameter is required." });
-  }
-
-  const employee = await Employee.findOne({ _id: req.body.id }).exec();
-
-  if (!employee) {
-    return res
-      .status(204)
-      .json({ message: `No Employee matches ID ${req.body.id}.` });
-  }
-
-  if (req.body?.firstname) employee.firstname = req.body.firstname;
-  if (req.body?.lastname) employee.lastname = req.body.lastname;
-
-  const result = await employee.save();
-
+  result.forEach(async (state) => {
+    // look for the state in the DB
+    const stateExists = await FunFacts.findOne({ stateCode: state.code }).exec();
+    if (stateExists) {
+      state.funfacts = [...stateExists.funfacts];
+    }
+  });
   res.json(result);
 };
 
-const deleteEmployee = async (req, res) => {
-  if (!req?.body?.id) {
-    return res
-      .status(400)
-      .json({ message: "Employee ID Parameter is required." });
-  }
+const getFunFacts = async (req, res) => {
+  const facts = await FunFacts.findOne({ stateCode: req.code }).exec();
 
-  const employee = await Employee.findOne({ _id: req.body.id }).exec();
-
-  if (!employee) {
-    return res
-      .status(204)
-      .json({ message: `No Employee matches ID ${req.body.id}.` });
-  }
-
-  const result = await employee.deleteOne({ _id: req.body.id });
-
-  res.json(result);
-};
-const getState = async (req, res) => {
-  if (!req?.params?.state) {
-    return res.status(400).json({ message: "State Parameter is required." });
-  }
-  let state = await findState(req.params.state);
-
-  if (!state) {
+  if (!facts) {
     return res
       .status(404)
-      .json({ message: `Invalid state abbreviation parameter` });
+      .json({ message: `No Fun Facts found for ${req.name}` });
+  }
+  const randIndex = Math.floor(Math.random() * facts.funfacts.length);
+  console.log(randIndex);
+
+  res.json({ funfact: `${facts.funfacts[randIndex]}` });
+};
+
+const createNewFunFacts = async (req, res) => {
+  if (!req?.body?.funfacts) {
+    return res
+      .status(400)
+      .json({ message: "State fun facts value required"});
   }
 
-  res.json(state);
+  const facts = await FunFacts.findOne({ stateCode: req.code }).exec();
+  let result;
+  console.log(facts.funfacts);
+  if (!facts) {
+    result = FunFacts.create({
+      stateCode: req.code,
+      funfacts: req.body.funfacts,
+    });
+  } else {
+  facts.funfacts = [...facts.funfacts, ...req.body.funfacts];
+
+  console.log(facts);
+  
+  result = await facts.save();
+  }
+  res.json(result);
+};
+
+const updateFunFacts = async (req, res) => {
+  if (!req?.body?.index) {
+    return res
+      .status(400)
+      .json({ message: "State fun fact index value required" });
+  }
+  if (!req?.body?.funfact) {
+    return res
+      .status(400)
+      .json({ message: "State fun fact value required"});
+  }
+  const index = req.body.index-1;
+  const facts = await FunFacts.findOne({ stateCode: req.code }).exec();
+  
+  if (!facts) {
+    return res
+      .status(404)
+      .json({ message: `No Fun Facts found for ${req.name}` });
+  }
+
+  facts.funfacts[index] = req.body.funfact;
+  console.log(facts); 
+  const result = await facts.save();
+
+  res.json(result);
+};
+
+const deleteFunFacts = async (req, res) => {
+  if (!req?.body?.index) {
+    return res
+      .status(400)
+      .json({ message: "State fun fact index value required" });
+  }
+  const index = req.body.index-1;
+  const facts = await FunFacts.findOne({ stateCode: req.code }).exec();
+
+  console.log(facts.funfacts);
+  if (!facts) {
+    return res
+      .status(404)
+      .json({ message: `No Fun Facts found for ${req.name}` });
+  }
+
+  fact = facts.funfacts[index];
+  facts.funfacts.splice(index, 1);
+
+  console.log(facts);
+  
+  const result = await facts.save();
+  res.json(result);
+};
+
+const getState = async (req, res) => {
+  let state = await findState(req.code);
+    // look for the state in the DB
+    const stateExists = await FunFacts.findOne({ stateCode: state.code }).exec();
+    if (stateExists) {
+      state.funfacts = [...stateExists.funfacts];
+    }
+    res.json(state);
 };
 
 const getStateCapital = async (req, res) => {
-  if (!req?.params?.state) {
-    return res.status(400).json({ message: "State Parameter is required." });
-  }
-  let state = await findState(req.params.state);
-
-  if (!state) {
-    return res
-      .status(404)
-      .json({ message: `Invalid state abbreviation parameter` });
-  }
-
+  let state = await findState(req.code);
   res.json({
     state: state.state,
     capital: state.capital_city,
@@ -104,17 +128,7 @@ const getStateCapital = async (req, res) => {
 };
 
 const getStateNickname = async (req, res) => {
-  if (!req?.params?.state) {
-    return res.status(400).json({ message: "State Parameter is required." });
-  }
-  let state = await findState(req.params.state);
-
-  if (!state) {
-    return res
-      .status(404)
-      .json({ message: `Invalid state abbreviation parameter` });
-  }
-
+  let state = await findState(req.code);
   res.json({
     state: state.state,
     nickname: state.nickname,
@@ -122,17 +136,7 @@ const getStateNickname = async (req, res) => {
 };
 
 const getStatePopulation = async (req, res) => {
-  if (!req?.params?.state) {
-    return res.status(400).json({ message: "State Parameter is required." });
-  }
-  let state = await findState(req.params.state);
-
-  if (!state) {
-    return res
-      .status(404)
-      .json({ message: `Invalid state abbreviation parameter` });
-  }
-
+  let state = await findState(req.code);
   res.json({
     state: state.state,
     population: state.population,
@@ -140,56 +144,31 @@ const getStatePopulation = async (req, res) => {
 };
 
 const getStateAdmission = async (req, res) => {
-  if (!req?.params?.state) {
-    return res.status(400).json({ message: "State Parameter is required." });
-  }
-  let state = await findState(req.params.state);
-
-  if (!state) {
-    return res
-      .status(404)
-      .json({ message: `Invalid state abbreviation parameter` });
-  }
-
+  let state = await findState(req.code);
   res.json({
     state: state.state,
     admitted: state.admission_date,
   });
 };
 
-const findState = async (code) => {
-  let result = null;
-  states.forEach((state) => {
-    if (state.code === code.toUpperCase()) {
-      result = state;
-    }
-  });
-  return result;
-};
+const findState = async (code) => states.find(st => st.code === code);
 
 const findStatesByContiguity = async (isContiguous) => {
-  // console.log(typeof isContiguous)
-  // console.log(isContiguous);
-  let result = [];
-  states.forEach((state) => {
-    if (isContiguous === 'true') {
-      if (state.code !== "AK" && state.code !== "HI") {
-        // console.log(state.code);
-        result.push(state);
-      }
-    } else if (state.code === "AK" || state.code === "HI") {
-      // console.log(state.code);
-      result.push(state);
-    }
-  });
+  let result;
+  if (isContiguous === "true") {
+    result = states.filter((st) => st.code !== "AK" && st.code !== "HI");
+  } else {
+    result = states.filter((st) => st.code === "AK" || st.code === "HI");
+  }
   return result;
 };
 
 module.exports = {
   getAllStates,
-  createNewEmployee,
-  updateEmployee,
-  deleteEmployee,
+  getFunFacts,
+  createNewFunFacts,
+  updateFunFacts,
+  deleteFunFacts,
   getState,
   getStateCapital,
   getStateNickname,
